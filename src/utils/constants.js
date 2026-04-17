@@ -43,3 +43,40 @@ module.exports = {
   COLLEGES,
   ROLES,
 };
+const DOMAINS = {
+  technical: {
+    software: [
+      "Web Development","App Development","Machine Learning","Artificial Intelligence",
+      "Data Science","Cyber Security","Cloud Computing","Blockchain","Game Development",
+      "DevOps","UI/UX Design","Competitive Programming"
+    ],
+    hardware: [
+      "Robotics","Embedded Systems","IoT (Internet of Things)","VLSI Design",
+      "Drone Technology","Arduino Projects","Raspberry Pi","Electronics Circuits","Automation Systems"
+    ]
+  },
+  cultural: [
+    "Dance","Singing","Music Instrument","Drama / Theatre","Photography","Videography",
+    "Content Creation","Public Speaking","Debate","Poetry","Creative Writing",
+    "Anchoring","Event Management","Stand-up Comedy","Fashion / Modeling"
+  ],
+  sports: [
+    "Cricket","Football","Badminton","Basketball","Volleyball","Table Tennis",
+    "Chess","Athletics","Kabaddi","Gym / Fitness","Yoga"
+  ],
+  other: [
+    "Entrepreneurship","Startup Enthusiast","Social Work","NGO Activities",
+    "Leadership","Management","Marketing","Finance","Stock Market"
+  ]
+};
+
+// Flatten for enum
+const DOMAIN_LIST = [
+  ...DOMAINS.technical.software,
+  ...DOMAINS.technical.hardware,
+  ...DOMAINS.cultural,
+  ...DOMAINS.sports,
+  ...DOMAINS.other
+];
+
+module.exports = { DOMAINS, DOMAIN_LIST };

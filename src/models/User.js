@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { COLLEGES } = require("../utils/constants");
+const { DOMAIN_LIST } = require("../utils/constants");
 
 const userSchema = new mongoose.Schema(
   {
@@ -18,6 +19,23 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
+domain: {
+  type: [String],
+  enum: DOMAIN_LIST
+},
+
+about: {
+  type: String,
+  maxlength: 1000
+},
+
+profilePhoto: {
+  type: String // Cloudinary URL
+},
+
+phone: String,
+address: String,
+
     // STUDENT FIELDS
     branch: String,
    section: {
@@ -27,6 +45,8 @@ const userSchema = new mongoose.Schema(
     year: Number,
     collegeId: { type: String, unique: true, sparse: true }, // student no
     universityRollNo: String,
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
 
     // FACULTY FIELDS
     designation: String,
