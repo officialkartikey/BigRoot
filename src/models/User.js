@@ -52,7 +52,13 @@ address: String,
     designation: String,
     department: String,
     qualification: String,
-    email: { type: String, unique: true, sparse: true },
+      email: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+      lowercase: true
+    },
 
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

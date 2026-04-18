@@ -3,7 +3,7 @@ const User = require("../models/User");
 const generateToken = require("../utils/generateToken");
 
 const otpStore = require("../utils/otpStore");
-const { sendOTP } = require("../services/emailService");
+const { sendEmail } = require("../services/emailService");
 const crypto = require("crypto");
 
 
@@ -43,16 +43,18 @@ exports.sendAdminOTP = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Store OTP with expiry (5 min)
     otpStore.set(email, {
       otp,
       expiresAt: Date.now() + 5 * 60 * 1000,
     });
 
-    await sendOTP(email, otp);
+    await sendEmail({
+      to: email,
+      subject: "Admin Registration OTP",
+      html: `<h2>Your OTP is: ${otp}</h2><p>Valid for 5 minutes</p>`,
+    });
 
     res.json({ msg: "OTP sent to email" });
 
@@ -243,11 +245,14 @@ exports.forgotPassword = async (req, res) => {
     let user;
 
     if (role === "student") {
+  
+
       user = await User.findOne({
         collegeId: identifier,
         role: "student",
         collegeName,
       });
+
     } else {
       user = await User.findOne({
         email: identifier,
@@ -278,10 +283,16 @@ exports.forgotPassword = async (req, res) => {
     const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
 
     // 📧 Send mail
-    await sendOTP(
-      user.email,
-      `Reset your password using this link: ${resetUrl}`
-    );
+   await sendEmail({
+  to: user.email,
+  subject: "Reset Password",
+  html: `
+    <h2>Password Reset</h2>
+    <p>Click the link below to reset your password:</p>
+    <a href="${resetUrl}">${resetUrl}</a>
+    <p>This link will expire in 15 minutes.</p>
+  `
+});
 
     res.json({
       msg: "Password reset link sent to email",

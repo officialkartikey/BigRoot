@@ -95,6 +95,7 @@ exports.updateProfile = async (req, res) => {
 
     // ✅ Student specific
     if (user.role === "student") {
+      
 
       if (email) user.email = email;
 
@@ -129,10 +130,7 @@ exports.updateProfile = async (req, res) => {
 
     await user.save();
 
-    res.json({
-      msg: "Profile updated successfully",
-      user,
-    });
+   await User.findById(req.user._id).select("-password");
 
   } catch (error) {
     res.status(500).json({ msg: error.message });
