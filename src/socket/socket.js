@@ -64,6 +64,73 @@ module.exports = (io) => {
         console.error("Connection request error:", err);
       }
     });
+    // ✅ ACCEPT CONNECTION REQUEST
+socket.on("acceptConnectionRequest", async ({ senderId, receiverId }) => {
+  try {
+
+    // 🔗 1. Update both users (assuming you have connections array)
+    const User = require("../models/User");
+
+    await User.findByIdAndUpdate(receiverId, {
+      $addToSet: { connections: senderId }
+    });
+
+    await User.findByIdAndUpdate(senderId, {
+      $addToSet: { connections: receiverId }
+    });
+
+    // 🗑️ 2. Remove old request notification (optional)
+    await Notification.deleteOne({
+      user: receiverId,
+      sender: senderId,
+      type: "connection_request"
+    });
+
+    // 🔔 3. Notify sender that request accepted
+    const notification = await Notification.create({
+      user: senderId,
+      type: "connection_accepted",
+      message: "Your connection request was accepted",
+      sender: receiverId
+    });
+
+    // 📡 4. Real-time emit
+    if (users.has(senderId)) {
+      io.to(users.get(senderId)).emit("notification", {
+        _id: notification._id,
+        type: "connection_accepted",
+        message: "Your connection request was accepted",
+        sender: receiverId
+      });
+    }
+
+  } catch (err) {
+    console.error("Accept request error:", err);
+  }
+});
+socket.on("rejectConnectionRequest", async ({ senderId, receiverId }) => {
+  try {
+
+    // 🗑️ delete notification
+    await Notification.deleteOne({
+      user: receiverId,
+      sender: senderId,
+      type: "connection_request"
+    });
+
+    // (optional) notify sender
+    if (users.has(senderId)) {
+      io.to(users.get(senderId)).emit("notification", {
+        type: "connection_rejected",
+        message: "Your connection request was rejected",
+        sender: receiverId
+      });
+    }
+
+  } catch (err) {
+    console.error("Reject request error:", err);
+  }
+});
 
     // 🔔 Post notification
     socket.on("newPost", ({ connections, user }) => {
