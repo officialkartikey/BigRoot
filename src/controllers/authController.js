@@ -280,7 +280,7 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
 
     // 🔗 Reset link
-    const resetUrl = `http://localhost:5000/reset-password/${resetToken}`;
+    const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
 
     // 📧 Send mail
    await sendEmail({
