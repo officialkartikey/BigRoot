@@ -4,6 +4,7 @@ const router = express.Router();
 const {
   sendRequest,
   respond,
+  getPendingRequests,
   getConnections
 } = require("../controllers/connectionController");
 
@@ -17,5 +18,5 @@ router.post("/respond/:connectionId", protect, respond);
 
 // 👥 Get my connections
 router.get("/my", protect, getConnections);
-
+router.get("/requests", protect, getPendingRequests);
 module.exports = router;

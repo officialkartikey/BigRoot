@@ -1,5 +1,6 @@
 const Connection = require("../models/Connection");
 
+
 // Send request
 exports.sendRequest = async (req, res) => {
   const sender = req.user._id;
@@ -51,5 +52,27 @@ exports.getConnections = async (req, res) => {
     res.json(connections);
   } catch (err) {
     res.status(500).json({ msg: err.message });
+  }
+};
+
+
+exports.getPendingRequests = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const requests = await Connection.find({
+      receiver: userId,
+      status: "pending",
+    })
+      .populate("sender", "name profilePhoto role")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      count: requests.length,
+      requests,
+    });
+
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
   }
 };
