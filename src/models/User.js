@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
 
 domain: {
   type: [String],
-  enum: DOMAIN_LIST
+  // enum: DOMAIN_LIST
 },
 
 about: {

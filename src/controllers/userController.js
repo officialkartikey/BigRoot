@@ -98,45 +98,52 @@ exports.updateProfile = async (req, res) => {
 
     // ✅ Student specific
     if (user.role === "student") {
-      
 
       if (email) user.email = email;
 
-      // 🔥 DOMAIN VALIDATION (your code integrated)
-      if (domain) {
+      if (domain !== undefined) {
+        let normalizedDomain = domain;
 
-        // ensure array
-        if (!Array.isArray(domain)) {
-          return res.status(400).json({ msg: "Domain must be an array" });
+        if (!Array.isArray(normalizedDomain)) {
+          normalizedDomain = [normalizedDomain];
         }
 
-        // validate values
-        const invalid = domain.filter(d => !DOMAIN_LIST.includes(d));
+        normalizedDomain = normalizedDomain
+          .map(d => (typeof d === "string" ? d.trim() : ""))
+          .filter(d => d.length > 0);
 
-        if (invalid.length > 0) {
-          return res.status(400).json({
-            msg: "Invalid domain selected",
-            invalid
-          });
+        normalizedDomain = [...new Set(normalizedDomain)];
+
+        if (normalizedDomain.length > 10) {
+          return res.status(400).json({ msg: "Max 10 domains allowed" });
         }
 
-        user.domain = domain;
+        user.domain = normalizedDomain;
       }
     }
 
-    // 📸 Profile photo (Cloudinary URL preferred)
+    // 📸 Profile photo
     if (req.file) {
       user.profilePhoto = req.file.path; 
-      // 👉 If using Cloudinary uploader, use:
-      // user.profilePhoto = result.secure_url;
+      // Cloudinary → req.file.path already contains URL (if configured)
     }
 
     await user.save();
 
-   await User.findById(req.user._id).select("-password");
+    // ✅ get updated user without password
+    const updatedUser = await User.findById(req.user._id).select("-password");
+
+    console.log("updateProfile API hit");
+
+    // 🔥 THIS WAS MISSING
+    return res.status(200).json({
+      msg: "Profile updated successfully",
+      user: updatedUser
+    });
 
   } catch (error) {
-    res.status(500).json({ msg: error.message });
+    console.error(error);
+    return res.status(500).json({ msg: error.message });
   }
 };
 
