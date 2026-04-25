@@ -280,7 +280,7 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
 
     // 🔗 Reset link
-    const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+    const resetUrl = `https://big-root.vercel.app/reset-password/${resetToken}`;
 
     // 📧 Send mail
    await sendEmail({
