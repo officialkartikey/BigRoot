@@ -3,6 +3,9 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const { DOMAIN_LIST } = require("../utils/constants");
+const Post = require("../models/Post");
+const Connection = require("../models/Connection");
+// const User = require("../models/User");
 
 
 
@@ -136,3 +139,63 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ msg: error.message });
   }
 };
+
+
+
+exports.getUserProfile = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const currentUser = req.user._id;
+
+    let { page = 1, limit = 5 } = req.query;
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    const skip = (page - 1) * limit;
+
+    // 👤 user info
+    const user = await User.findById(userId).select("-password");
+
+    // 📝 posts with pagination
+    const posts = await Post.find({ author: userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalPosts = await Post.countDocuments({ author: userId });
+
+    // 🔗 connection status
+    const connection = await Connection.findOne({
+      $or: [
+        { sender: currentUser, receiver: userId },
+        { sender: userId, receiver: currentUser },
+      ],
+    });
+
+    let connectionStatus = "none";
+
+    if (connection) {
+      if (connection.status === "pending") {
+        connectionStatus =
+          connection.sender.toString() === currentUser.toString()
+            ? "pending_sent"
+            : "pending_received";
+      } else if (connection.status === "accepted") {
+        connectionStatus = "connected";
+      }
+    }
+
+    res.json({
+      user,
+      posts,
+      page,
+      totalPosts,
+      connectionStatus,
+    });
+
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+};
+
+
