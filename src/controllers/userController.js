@@ -204,5 +204,35 @@ exports.getUserProfile = async (req, res) => {
     res.status(500).json({ msg: error.message });
   }
 };
+// const User = require("../models/User");
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    let { page = 1, limit = 10 } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    const skip = (page - 1) * limit;
+
+    const users = await User.find()
+      .select("name profilePhoto role collegeName") // 🔒 safe fields only
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    const totalUsers = await User.countDocuments();
+
+    res.json({
+      page,
+      totalUsers,
+      count: users.length,
+      users,
+    });
+
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+};
 
 
